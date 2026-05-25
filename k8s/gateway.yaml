@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - name: gateway
+        image: gateway:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
+          value: organization-service
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+          value: http://organization:8081
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0
+          value: Path=/organization/**
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_1_ID
+          value: department-service
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+          value: http://department:8082
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
+          value: Path=/department/**
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
+          value: employee-service
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
+          value: http://employee:8083
+        - name: SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0
+          value: Path=/employee/**
+        - name: EUREKA_CLIENT_ENABLED
+          value: "false"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+spec:
+  selector:
+    app: gateway
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: NodePort
