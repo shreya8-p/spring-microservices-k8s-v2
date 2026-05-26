@@ -9,6 +9,11 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      organization-digest: ${{ steps.org.outputs.digest }}
+      department-digest: ${{ steps.dept.outputs.digest }}
+      employee-digest: ${{ steps.emp.outputs.digest }}
+      gateway-digest: ${{ steps.gw.outputs.digest }}
 
     steps:
     - name: Checkout code
@@ -45,6 +50,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push organization image
+      id: org
       uses: docker/build-push-action@v6
       with:
         context: ./organization
@@ -53,6 +59,7 @@ jobs:
         tags: patilshreya08/organization:latest
 
     - name: Build and push department image
+      id: dept
       uses: docker/build-push-action@v6
       with:
         context: ./department
@@ -61,6 +68,7 @@ jobs:
         tags: patilshreya08/department:latest
 
     - name: Build and push employee image
+      id: emp
       uses: docker/build-push-action@v6
       with:
         context: ./employee
@@ -69,6 +77,7 @@ jobs:
         tags: patilshreya08/employee:latest
 
     - name: Build and push gateway image
+      id: gw
       uses: docker/build-push-action@v6
       with:
         context: ./gateway
@@ -102,6 +111,7 @@ jobs:
       id-token: write
       contents: read
       packages: write
+      attestations: write
 
     steps:
     - name: Install cosign
@@ -127,4 +137,27 @@ jobs:
 
     - name: Sign gateway image
       run: cosign sign --yes patilshreya08/gateway:latest
+      continue-on-error: true
+
+    - name: Generate SBOM for organization
+      uses: anchore/sbom-action@v0
+      with:
+        image: patilshreya08/organization:latest
+        format: spdx-json
+        output-file: organization-sbom.spdx.json
+      continue-on-error: true
+
+    - name: Generate SBOM for gateway
+      uses: anchore/sbom-action@v0
+      with:
+        image: patilshreya08/gateway:latest
+        format: spdx-json
+        output-file: gateway-sbom.spdx.json
+      continue-on-error: true
+
+    - name: Upload SBOM artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom-reports
+        path: "*-sbom.spdx.json"
       continue-on-error: true
