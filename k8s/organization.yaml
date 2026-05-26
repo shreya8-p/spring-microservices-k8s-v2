@@ -12,6 +12,7 @@ spec:
       labels:
         app: organization
     spec:
+      serviceAccountName: microservices-sa
       containers:
       - name: organization
         image: organization:latest
@@ -21,12 +22,6 @@ spec:
         env:
         - name: SPRING_DATA_MONGODB_URI
           value: mongodb://mongodb:27017/organizationdb
-        - name: EUREKA_CLIENT_ENABLED
-          value: "false"
-        - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
-          value: "false"
-        - name: EUREKA_CLIENT_FETCH_REGISTRY
-          value: "false"
 ---
 apiVersion: v1
 kind: Service
