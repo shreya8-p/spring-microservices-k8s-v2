@@ -161,3 +161,31 @@ jobs:
         name: sbom-reports
         path: "*-sbom.spdx.json"
       continue-on-error: true
+
+    - name: Attest SLSA provenance for organization
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-name: index.docker.io/patilshreya08/organization
+        subject-digest: ${{ needs.build-and-push.outputs.organization-digest }}
+      continue-on-error: true
+
+    - name: Attest SLSA provenance for department
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-name: index.docker.io/patilshreya08/department
+        subject-digest: ${{ needs.build-and-push.outputs.department-digest }}
+      continue-on-error: true
+
+    - name: Attest SLSA provenance for employee
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-name: index.docker.io/patilshreya08/employee
+        subject-digest: ${{ needs.build-and-push.outputs.employee-digest }}
+      continue-on-error: true
+
+    - name: Attest SLSA provenance for gateway
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-name: index.docker.io/patilshreya08/gateway
+        subject-digest: ${{ needs.build-and-push.outputs.gateway-digest }}
+      continue-on-error: true
